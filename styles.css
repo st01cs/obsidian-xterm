@@ -1,8 +1,10 @@
-/*
+/* xterm.js terminal styles for Obsidian plugin */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
-*/
+.terminal-container {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  height: calc(100% - 40px);
+  margin-top: 10px;
+}

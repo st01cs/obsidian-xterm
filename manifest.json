@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "obsidian-xterm",
+	"name": "Obsidian-Xterm",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "Terminal emulator plugin for Obsidian using xterm.js with full shell access",
+	"author": "Obsidian Terminal Plugin",
+	"authorUrl": "",
+	"fundingUrl": "",
+	"isDesktopOnly": true
 }
