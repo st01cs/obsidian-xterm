@@ -122,7 +122,6 @@ class TerminalView extends ItemView {
 	async onOpen() {
 		const container = this.containerEl.children[1];
 		container.empty();
-		container.createEl('h4', { text: 'Terminal' });
 
 		const terminalContainer = container.createEl('div');
 		terminalContainer.addClass('terminal-container');
