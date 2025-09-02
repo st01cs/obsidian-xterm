@@ -94,6 +94,23 @@ io.on('connection', (socket) => {
 // Bind to localhost only for security
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`Terminal server running on http://localhost:${PORT}`);
+  console.log(`Using shell: ${shell}`);
+  console.log(`Server PID: ${process.pid}`);
+});
+
+// Handle server errors
+server.on('error', (err) => {
+  console.error('Server error:', err);
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+    process.exit(1);
+  } else if (err.code === 'EACCES') {
+    console.error(`Permission denied to bind to port ${PORT}`);
+    process.exit(1);
+  } else {
+    console.error(`Failed to start server: ${err.message}`);
+    process.exit(1);
+  }
 });
 
 // Graceful shutdown handlers

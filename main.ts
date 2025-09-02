@@ -180,7 +180,9 @@ class TerminalView extends ItemView {
 		this.socket = io(this.plugin.settings.serverUrl, {
 			reconnection: true,
 			reconnectionAttempts: 5,
-			reconnectionDelay: 1000
+			reconnectionDelay: 1000,
+			timeout: 10000, // 10 second connection timeout
+			forceNew: true // Force a new connection
 		});
 
 		this.socket.on('connect', () => {
@@ -211,17 +213,34 @@ class TerminalView extends ItemView {
 		});
 
 		this.socket.on('connect_error', (error) => {
+			console.error('Socket connection error:', error);
 			this.terminal.write(`\r\nConnection error: ${error.message}\r\n`);
+			
+			// More detailed error information
+			if (error.message.includes('timeout')) {
+				this.terminal.write('Connection timed out. Server may still be starting up.\r\n');
+			} else if (error.message.includes('ECONNREFUSED')) {
+				this.terminal.write('Connection refused. Server is not running or port is blocked.\r\n');
+			}
+			
 			if (this.plugin.settings.autoStartServer && !this.serverStarting) {
 				this.terminal.write('\r\nAttempting to auto-start server...\r\n');
 				this.autoStartServer();
 			} else {
 				this.terminal.write('Make sure the terminal server is running:\r\n');
 				this.terminal.write('1. cd to plugin directory\r\n');
-				this.terminal.write('2. npm install (using package-server.json)\r\n');
+				this.terminal.write('2. npm install express socket.io node-pty\r\n');
 				this.terminal.write('3. node server.js\r\n');
 			}
 		});
+
+		// Add connection timeout handling
+		setTimeout(() => {
+			if (!this.isConnected && this.socket) {
+				this.terminal.write('\r\nConnection attempt timed out\r\n');
+				this.socket.disconnect();
+			}
+		}, 15000); // 15 second overall timeout
 	}
 
 	async autoStartServer() {
@@ -233,6 +252,7 @@ class TerminalView extends ItemView {
 		if (isRunning) {
 			this.terminal.write('Server is already running\r\n');
 			this.connectToServer();
+			this.serverStarting = false;
 			return;
 		}
 		
@@ -241,35 +261,60 @@ class TerminalView extends ItemView {
 		const serverStarted = await this.startServer();
 		
 		if (serverStarted) {
-			// Wait a bit for server to fully initialize
-			setTimeout(() => {
-				this.connectToServer();
-			}, 1000);
+			// Wait longer for server to fully initialize
+			this.terminal.write('Waiting for server to be ready...\r\n');
+			
+			// Poll until server is actually accepting connections
+			let attempts = 0;
+			const maxAttempts = 20;
+			const checkInterval = 500;
+			
+			const waitForServer = async () => {
+				attempts++;
+				const ready = await this.checkServerRunning();
+				
+				if (ready) {
+					this.terminal.write('Server is ready\r\n');
+					this.connectToServer();
+					this.serverStarting = false;
+				} else if (attempts < maxAttempts) {
+					setTimeout(waitForServer, checkInterval);
+				} else {
+					this.terminal.write('\r\nServer failed to become ready within timeout\r\n');
+					this.serverStarting = false;
+				}
+			};
+			
+			setTimeout(waitForServer, 1000);
 		} else {
 			this.terminal.write('\r\nFailed to start server automatically\r\n');
+			this.serverStarting = false;
 		}
-		this.serverStarting = false;
 	}
 
 	checkServerRunning(): Promise<boolean> {
 		return new Promise((resolve) => {
 			const client = new net.Socket();
-			client.setTimeout(1000);
+			client.setTimeout(2000); // Increase timeout to 2 seconds
 			
 			client.on('connect', () => {
+				console.log('Server port check: connected successfully');
 				client.destroy();
 				resolve(true);
 			});
 			
-			client.on('error', () => {
+			client.on('error', (err: any) => {
+				console.log('Server port check: connection failed -', err.code);
 				resolve(false);
 			});
 			
 			client.on('timeout', () => {
+				console.log('Server port check: timeout');
 				client.destroy();
 				resolve(false);
 			});
 			
+			console.log(`Checking server connection to localhost:${this.plugin.settings.serverPort}`);
 			client.connect(this.plugin.settings.serverPort, 'localhost');
 		});
 	}
@@ -439,12 +484,18 @@ class TerminalView extends ItemView {
 				
 				if (this.plugin.serverProcess) {
 					this.plugin.serverProcess.stdout?.on('data', (data: Buffer) => {
-						console.log('Server output:', data.toString());
+						const output = data.toString();
+						console.log('Server output:', output);
+						// Show important server messages in terminal
+						if (output.includes('running on') || output.includes('listening') || output.includes('started')) {
+							this.terminal.write(`Server: ${output.trim()}\r\n`);
+						}
 					});
 					
 					this.plugin.serverProcess.stderr?.on('data', (data: Buffer) => {
-						console.error('Server error:', data.toString());
-						this.terminal.write(`Server error: ${data.toString()}\r\n`);
+						const error = data.toString();
+						console.error('Server error:', error);
+						this.terminal.write(`Server error: ${error}\r\n`);
 					});
 					
 					this.plugin.serverProcess.on('error', (error: any) => {
@@ -454,6 +505,9 @@ class TerminalView extends ItemView {
 							this.terminal.write(`Please install Node.js from https://nodejs.org/\r\n`);
 						} else if (error.code === 'EACCES') {
 							this.terminal.write(`\r\nPermission denied to run Node.js\r\n`);
+						} else if (error.code === 'EADDRINUSE') {
+							this.terminal.write(`\r\nPort ${this.plugin.settings.serverPort} is already in use\r\n`);
+							this.terminal.write(`Try changing the server port in settings\r\n`);
 						} else {
 							this.terminal.write(`Failed to start server: ${error.message}\r\n`);
 						}
@@ -461,8 +515,11 @@ class TerminalView extends ItemView {
 						resolve(false);
 					});
 					
-					this.plugin.serverProcess.on('exit', (code) => {
-						console.log(`Server process exited with code ${code}`);
+					this.plugin.serverProcess.on('exit', (code, signal) => {
+						console.log(`Server process exited with code ${code}, signal ${signal}`);
+						if (code !== 0) {
+							this.terminal.write(`\r\nServer exited with code ${code}\r\n`);
+						}
 						this.plugin.serverProcess = null;
 					});
 				}
