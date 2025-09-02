@@ -465,6 +465,7 @@ class TerminalView extends ItemView {
 						env: { 
 							...process.env, 
 							PORT: this.plugin.settings.serverPort.toString(),
+							VAULT_PATH: vaultPath,
 							ELECTRON_RUN_AS_NODE: '1'
 						},
 						detached: false,
@@ -476,7 +477,11 @@ class TerminalView extends ItemView {
 					// Spawn the server process with absolute path
 					this.plugin.serverProcess = childProcess.spawn(nodePath, [serverPath], {
 						cwd: pluginPath,
-						env: { ...process.env, PORT: this.plugin.settings.serverPort.toString() },
+						env: { 
+							...process.env, 
+							PORT: this.plugin.settings.serverPort.toString(),
+							VAULT_PATH: vaultPath
+						},
 						detached: false,
 						shell: false
 					});

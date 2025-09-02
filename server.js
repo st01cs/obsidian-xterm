@@ -41,11 +41,15 @@ io.on('connection', (socket) => {
     console.log(`Creating terminal for ${socket.id} with cols:${cols} rows:${rows}`);
     console.log(`Using shell: ${shell}`);
     
+    // Use vault path as working directory if provided, otherwise fall back to HOME
+    const workingDir = process.env.VAULT_PATH || process.env.HOME;
+    console.log(`Working directory: ${workingDir}`);
+    
     const term = pty.spawn(shell, [], {
       name: 'xterm-256color',
       cols: cols || 80,
       rows: rows || 30,
-      cwd: process.env.HOME,
+      cwd: workingDir,
       env: process.env
     });
 
