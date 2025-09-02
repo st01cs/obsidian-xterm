@@ -132,6 +132,9 @@ class TerminalView extends ItemView {
 			rows: 24,
 			cols: 80,
 			fontSize: this.plugin.settings.fontSize,
+			cursorBlink: true,
+			cursorStyle: 'block',
+			allowTransparency: false,
 			theme: {
 				background: this.plugin.settings.theme === 'dark' ? '#000000' : '#ffffff',
 				foreground: this.plugin.settings.theme === 'dark' ? '#ffffff' : '#000000'
@@ -139,6 +142,9 @@ class TerminalView extends ItemView {
 		});
 
 		this.terminal.open(terminalContainer);
+		
+		// Clear any initial artifacts
+		this.terminal.clear();
 		
 		if (this.plugin.settings.autoStartServer) {
 			this.autoStartServer();

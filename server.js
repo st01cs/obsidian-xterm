@@ -50,10 +50,19 @@ io.on('connection', (socket) => {
       cols: cols || 80,
       rows: rows || 30,
       cwd: workingDir,
-      env: process.env
+      env: {
+        ...process.env,
+        TERM: 'xterm-256color',
+        COLORTERM: 'truecolor'
+      }
     });
 
     terminals[socket.id] = term;
+
+    // Send initial clear sequence to clean up any artifacts
+    setTimeout(() => {
+      term.write('\x1bc'); // Reset terminal
+    }, 100);
 
     term.onData((data) => {
       socket.emit('data', data);
