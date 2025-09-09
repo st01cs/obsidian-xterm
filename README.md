@@ -1,94 +1,124 @@
-# Obsidian Sample Plugin
+# Obsidian XTerm Terminal Plugin
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+A fully functional terminal emulator for Obsidian using a dual-architecture approach with xterm.js frontend and Node.js backend for reliable shell access.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Architecture
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+**🏗️ Dual-Architecture Design:**
+- **Frontend**: Obsidian plugin using xterm.js for terminal UI (TypeScript)
+- **Backend**: Node.js server using socket.io and node-pty for shell process management  
+- **Communication**: WebSocket connection for real-time bidirectional I/O
 
-## First time developing plugins?
+This architecture provides superior shell integration, proper PTY support, and avoids the limitations of running shell processes directly in Obsidian's restricted environment.
 
-Quick starting guide for new plugin devs:
+## Features
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- **Full Terminal Emulator**: Uses xterm.js for a complete terminal experience
+- **Real Shell Access**: Proper PTY integration with node-pty for authentic shell behavior
+- **WebSocket Communication**: Real-time bidirectional I/O between frontend and backend
+- **Multi-Platform**: Works on macOS, Linux, and Windows with appropriate shell detection
+- **Desktop Only**: Designed for desktop environments with shell access
+- **Server Health Monitoring**: Built-in server status checking and health endpoints
+- **Configurable**: Customizable shell, server URL, and font size settings
+- **Integrated UI**: Opens as a panel in Obsidian's workspace
 
-## Releasing new releases
+## Installation
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+### Step 1: Install the Plugin Files
+1. Download the plugin files to your Obsidian plugins folder:
+   - `main.js`
+   - `manifest.json` 
+   - `styles.css`
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+2. Enable the plugin in Obsidian's Community Plugins settings
 
-## Adding your plugin to the community plugin list
+### Step 2: Backend Server
+The plugin requires a separate Node.js backend server to be running.
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+**🚀 Automatic Startup (Default):**
+The plugin will automatically start the server when you open a terminal! No manual setup required.
 
-## How to use
+**Manual Control (Optional):**
+```bash
+# macOS/Linux
+./start-server.sh
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+# Windows
+start-server.bat
 
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint ./src/`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+# Or manually:
+cd server
+npm install
+npm start
 ```
 
-If you have multiple URLs, you can also do:
+The server will start on `http://localhost:3001` by default.
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+## Usage
+
+### Opening the Terminal
+
+- **Ribbon Icon**: Click the terminal icon in the left ribbon
+- **Command Palette**: Run "Open Terminal" command
+- **Keyboard**: You can assign a hotkey to the "Open Terminal" command
+
+### Terminal Features
+
+- Full shell interaction with command history
+- Copy/paste support (use Ctrl+Shift+C/V or Cmd+C/V)
+- Scrollback buffer for viewing command history
+- Process management (close tab to terminate shell)
+
+## Settings
+
+Access plugin settings through **Settings > Community Plugins > Obsidian XTerm**:
+
+- **Auto-Start Server**: Automatically start the terminal server when opening a terminal (default: enabled)
+- **Server URL**: Terminal backend server URL (default: `http://localhost:3001`)
+- **Server Port**: Port for the terminal server (default: 3001)
+- **Shell**: Configure which shell to use (default: zsh on macOS, bash on Linux, PowerShell on Windows) 
+- **Font Size**: Adjust terminal font size (8-24px range)
+- **Server Management**: Check server status, manually start/stop server, and view server information
+
+## Requirements
+
+- **Desktop Only**: This plugin only works on desktop versions of Obsidian
+- **Node.js**: Requires Node.js runtime for the backend server
+- **Shell Access**: Requires a system with shell access (macOS, Linux, Windows)
+- **Network**: Backend server runs on localhost (configurable port)
+
+## Technical Details
+
+**Frontend (Obsidian Plugin):**
+- Built with TypeScript and xterm.js
+- Uses socket.io-client for WebSocket communication
+- Terminal view integrates with Obsidian's workspace system
+- CSS styling ensures proper terminal appearance
+
+**Backend (Node.js Server):**
+- Express.js web server with socket.io WebSocket support
+- node-pty for proper PTY (pseudo-terminal) integration  
+- Real shell process management with full terminal capabilities
+- Health monitoring and multi-client support
+
+**Communication Protocol:**
+- WebSocket-based real-time bidirectional communication
+- Events: `create-terminal`, `terminal-input`, `terminal-output`, `terminal-resize`, `terminal-exit`
+- Automatic reconnection and error handling
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Development build with watch
+npm run dev
+
+# Production build
+npm run build
 ```
 
-## API Documentation
+## License
 
-See https://github.com/obsidianmd/obsidian-api
+MIT License
