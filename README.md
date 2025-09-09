@@ -16,6 +16,7 @@ This architecture provides superior shell integration, proper PTY support, and a
 - **Full Terminal Emulator**: Complete terminal experience with xterm.js
 - **Real Shell Access**: Proper PTY integration with node-pty for authentic shell behavior
 - **Vault Root Directory**: Terminal starts in your Obsidian vault directory
+- **Full View Usage**: Terminal uses the complete available workspace area
 - **Auto-Start Server**: Automatically starts backend server when needed
 - **Cross-Platform**: Works on macOS, Linux, and Windows with appropriate shell detection
 - **User-Configurable Node.js Path**: Auto-detection with manual override option
@@ -78,6 +79,7 @@ npm start
 
 - Full shell interaction with command history
 - **Starts in vault directory**: Terminal opens in your Obsidian vault root directory
+- **Full workspace usage**: Terminal automatically fills the entire available view area
 - Copy/paste support (Ctrl/Cmd+Shift+C/V)
 - Scrollback buffer for viewing command history
 - Process management (close tab to terminate shell)
