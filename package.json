@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-xterm",
-	"version": "1.0.0",
+	"version": "0.1.1",
 	"description": "A fully functional terminal emulator for Obsidian using xterm.js that provides real shell access within the editor.",
 	"main": "main.js",
 	"scripts": {

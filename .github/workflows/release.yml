@@ -22,14 +22,32 @@ jobs:
         run: |
           npm install
           npm run build
+      
+      - name: Package
+        run: |
+            mkdir ${{ github.event.repository.name }}
+            cp main.js manifest.json styles.css server/server.js ${{ github.event.repository.name }}
+            zip -r ${{ github.event.repository.name }}.zip ${{ github.event.repository.name }}
 
       - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          tag="${GITHUB_REF#refs/tags/}"
-
-          gh release create "$tag" \
-            --title="$tag" \
-            --draft \
-            main.js manifest.json styles.css server/server.js
+          VERSION: ${{ github.ref }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+    
+      - name: Upload zip file
+        id: upload-zip
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./${{ github.event.repository.name }}.zip
+            asset_name: ${{ github.event.repository.name }}-${{ github.ref }}.zip
+            asset_content_type: application/zip
