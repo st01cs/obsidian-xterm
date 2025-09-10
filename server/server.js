@@ -1,16 +1,8 @@
 /**
  * Obsidian XTerm Terminal Server
  * 
- * A Node.js backend server that provides real shell access for the Obsidian XTerm plugin.
- * Uses socket.io for WebSocket communication and node-pty for proper PTY (pseudo-terminal) support.
- * 
- * Features:
- * - Real shell process management with node-pty
- * - WebSocket communication via socket.io
- * - Multi-client support with session management
- * - Cross-platform shell detection (Windows, macOS, Linux)
- * - Graceful shutdown handling
- * - Health monitoring endpoint
+ * Node.js backend server providing real shell access for the Obsidian XTerm plugin.
+ * Uses socket.io for WebSocket communication and node-pty for proper PTY support.
  */
 
 const express = require('express');

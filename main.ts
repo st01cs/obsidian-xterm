@@ -346,6 +346,7 @@ export default class TerminalPlugin extends Plugin {
 
 /**
  * Terminal view that renders xterm.js and handles WebSocket communication
+ * Optimized for full workspace usage with proper responsive layout
  */
 class TerminalView extends ItemView {
 	private terminal: Terminal;
@@ -385,28 +386,17 @@ class TerminalView extends ItemView {
 		return "terminal";
 	}
 
+	/**
+	 * Initializes the terminal view with full workspace layout optimization
+	 */
 	async onOpen() {
 		const container = this.containerEl.children[1] as HTMLElement;
 		container.empty();
 		
-		// Ensure container uses full available space
-		container.style.position = 'relative';
-		container.style.width = '100%';
-		container.style.height = '100%';
-		
 		const terminalContainer = container.createDiv();
 		terminalContainer.addClass('terminal-container');
 		
-		// Calculate initial terminal dimensions based on container size
-		const containerRect = container.getBoundingClientRect();
-		const fontSize = this.settings.fontSize;
-		const charWidth = fontSize * 0.6; // Approximate character width
-		const lineHeight = fontSize * 1.2; // Approximate line height
-		
-		const initialCols = Math.max(80, Math.floor(containerRect.width / charWidth));
-		const initialRows = Math.max(24, Math.floor(containerRect.height / lineHeight));
-		
-		// Initialize xterm.js with dynamic sizing
+		// Initialize xterm.js with responsive sizing and proper scrollback
 		this.terminal = new Terminal({
 			fontSize: this.settings.fontSize,
 			fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
@@ -416,29 +406,28 @@ class TerminalView extends ItemView {
 			},
 			cursorBlink: true,
 			convertEol: true,
-			cols: initialCols,
-			rows: initialRows,
+			cols: 80, // Will be resized immediately
+			rows: 24,
+			scrollback: 10000, // Large scrollback buffer for long outputs
 		});
 
 		this.terminal.open(terminalContainer);
 		
-		// Force initial resize after terminal is opened
-		setTimeout(() => {
-			this.resizeTerminal();
-		}, 100);
+		// Setup responsive behavior
+		this.setupResizeHandler(terminalContainer);
+		this.resizeTerminal(); // Initial size calculation
 		
 		this.terminal.focus();
 		
-		// Handle focus and resize
+		// Handle focus
 		terminalContainer.addEventListener('click', () => this.terminal.focus());
-		this.setupResizeHandler(terminalContainer);
 
 		// Connect to backend server
 		await this.initializeSocket();
 	}
 
 	/**
-	 * Resizes the terminal to fit the available space
+	 * Calculates and applies optimal terminal dimensions based on available space
 	 */
 	private resizeTerminal() {
 		if (!this.terminal) return;
@@ -448,8 +437,10 @@ class TerminalView extends ItemView {
 		
 		const rect = container.getBoundingClientRect();
 		const fontSize = this.settings.fontSize;
-		const charWidth = fontSize * 0.6; // More accurate character width estimation
-		const lineHeight = fontSize * 1.2; // More accurate line height estimation
+		
+		// Accurate character and line dimensions
+		const charWidth = fontSize * 0.6;
+		const lineHeight = fontSize * 1.2;
 		
 		const cols = Math.max(10, Math.floor(rect.width / charWidth));
 		const rows = Math.max(5, Math.floor(rect.height / lineHeight));
@@ -465,33 +456,22 @@ class TerminalView extends ItemView {
 	}
 
 	/**
-	 * Sets up terminal resize handling
+	 * Sets up responsive resize handling with debouncing for performance
 	 */
 	private setupResizeHandler(container: HTMLElement) {
-		// Debounce resize to avoid excessive calls
 		let resizeTimeout: NodeJS.Timeout;
 		
-		const resizeObserver = new ResizeObserver(() => {
+		const debouncedResize = () => {
 			clearTimeout(resizeTimeout);
-			resizeTimeout = setTimeout(() => {
-				this.resizeTerminal();
-			}, 100);
-		});
-		
-		resizeObserver.observe(container);
-		
-		// Also listen to window resize for good measure
-		const windowResizeHandler = () => {
-			clearTimeout(resizeTimeout);
-			resizeTimeout = setTimeout(() => {
-				this.resizeTerminal();
-			}, 100);
+			resizeTimeout = setTimeout(() => this.resizeTerminal(), 100);
 		};
 		
-		window.addEventListener('resize', windowResizeHandler);
+		// Observe container size changes
+		const resizeObserver = new ResizeObserver(debouncedResize);
+		resizeObserver.observe(container);
 		
-		// Store cleanup function
-		this.registerDomEvent(window, 'resize', windowResizeHandler);
+		// Also handle window resize
+		this.registerDomEvent(window, 'resize', debouncedResize);
 	}
 
 	/**

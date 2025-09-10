@@ -7,22 +7,20 @@ echo "=================================="
 
 cd server
 
-# Check if node_modules exists
+# Install dependencies if needed
 if [ ! -d "node_modules" ]; then
-    echo "📦 Installing server dependencies..."
+    echo "📦 Installing dependencies..."
     npm install
     if [ $? -ne 0 ]; then
-        echo "❌ Failed to install dependencies"
+        echo "❌ Installation failed"
         exit 1
     fi
 fi
 
-echo "🖥️  Starting terminal server on port 3001..."
-echo "📍 Health check: http://localhost:3001/health"
-echo "🔗 WebSocket endpoint: ws://localhost:3001"
-echo ""
-echo "💡 Keep this terminal open while using Obsidian XTerm plugin"
-echo "⏹️  Press Ctrl+C to stop the server"
+echo "🖥️  Starting server on port 3001..."
+echo "📍 Health: http://localhost:3001/health"
+echo "💡 Keep this terminal open while using plugin"
+echo "⏹️  Press Ctrl+C to stop"
 echo ""
 
 npm start

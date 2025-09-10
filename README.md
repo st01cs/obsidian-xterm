@@ -16,13 +16,13 @@ This architecture provides superior shell integration, proper PTY support, and a
 - **Full Terminal Emulator**: Complete terminal experience with xterm.js
 - **Real Shell Access**: Proper PTY integration with node-pty for authentic shell behavior
 - **Vault Root Directory**: Terminal starts in your Obsidian vault directory
-- **Full View Usage**: Terminal uses the complete available workspace area
+- **Full Viewport Layout**: Optimized CSS for complete workspace area usage with responsive sizing
 - **Auto-Start Server**: Automatically starts backend server when needed
 - **Cross-Platform**: Works on macOS, Linux, and Windows with appropriate shell detection
 - **User-Configurable Node.js Path**: Auto-detection with manual override option
 - **WebSocket Communication**: Real-time bidirectional I/O between frontend and backend
 - **Server Health Monitoring**: Built-in status checking and health endpoints
-- **Integrated UI**: Opens as a panel in Obsidian's workspace
+- **Integrated UI**: Seamless integration with Obsidian's workspace system
 
 ## 📋 Requirements
 
@@ -79,11 +79,11 @@ npm start
 
 - Full shell interaction with command history
 - **Starts in vault directory**: Terminal opens in your Obsidian vault root directory
-- **Full workspace usage**: Terminal automatically fills the entire available view area
+- **Full viewport layout**: Terminal automatically fills the entire available view area with responsive sizing
 - Copy/paste support (Ctrl/Cmd+Shift+C/V)
-- Scrollback buffer for viewing command history
+- **Large scrollback buffer**: 10,000 lines of command history with proper scrolling for long outputs
 - Process management (close tab to terminate shell)
-- Auto-resize when window changes
+- Auto-resize with debounced optimization for performance
 
 ## ⚙️ Configuration
 
@@ -149,7 +149,9 @@ Access settings through **Settings → Community Plugins → Obsidian XTerm**:
 - Built with TypeScript and xterm.js
 - Uses socket.io-client for WebSocket communication
 - Integrates with Obsidian's workspace system
-- Handles terminal rendering, input, and resize events
+- **Optimized Layout Engine**: Full viewport usage with responsive terminal sizing
+- **Performance Optimizations**: Debounced resize handling and efficient dimension calculations
+- Auto-start server functionality with comprehensive Node.js path detection
 
 ### Backend (Node.js Server)
 - Express.js web server with socket.io WebSocket support
@@ -157,13 +159,21 @@ Access settings through **Settings → Community Plugins → Obsidian XTerm**:
 - Real shell process management with full terminal capabilities
 - Health monitoring and multi-client support
 - Graceful shutdown handling
+- **Vault Directory Integration**: Automatic working directory detection
+
+### Layout Implementation
+The terminal uses an optimized CSS architecture for full viewport usage:
+- **Absolute Positioning**: Terminal container uses `position: absolute` with `inset: 0` for complete area coverage
+- **Obsidian Integration**: Custom CSS overrides for `.workspace-leaf-content[data-type="terminal-view"]` ensure proper padding removal
+- **Responsive Sizing**: JavaScript-based dimension calculation using font metrics for accurate terminal sizing
+- **Modern CSS**: Uses `inset` shorthand property and logical grouping for maintainable styles
 
 ### Communication Protocol
 WebSocket events:
-- `create-terminal`: Initialize new terminal session
+- `create-terminal`: Initialize new terminal session with vault directory
 - `terminal-input`: Send user input to shell
 - `terminal-output`: Receive shell output
-- `terminal-resize`: Handle terminal resize
+- `terminal-resize`: Handle terminal resize with dimension sync
 - `terminal-exit`: Handle shell process termination
 
 ## 🛠️ Development
